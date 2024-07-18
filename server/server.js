@@ -16,9 +16,6 @@ const connectionStringURI = `mongodb://127.0.0.1:27017`;
 // Initialize a new instance of MongoClient
 const client = new MongoClient(connectionStringURI);
 
-// Declare a variable to hold the connection
-let db;
-
 // Create variable to hold our database name
 const dbName = "inventoryDB";
 
