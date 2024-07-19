@@ -2,30 +2,22 @@ const express = require("express");
 const { ApolloServer } = require("@apollo/server");
 const { expressMiddleware } = require("@apollo/server/express4");
 const path = require("path");
-const { MongoClient } = require("mongodb");
-require("dotenv").config();
+const mongoose = require("mongoose");
+
 const { typeDefs, resolvers } = require("./schemas");
 const db = require("./config/connection");
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-// Connection string to local instance of MongoDB
-const connectionStringURI = `mongodb://127.0.0.1:27017`;
-
-// Initialize a new instance of MongoClient
-const client = new MongoClient(connectionStringURI);
-
-// Create variable to hold our database name
-const dbName = "inventoryDB";
-
-// Use connect method to connect to the mongo server
-client
-  .connect()
+// Connect to MongoDB using Mongoose
+mongoose
+  .connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/googlebooks", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Connected successfully to MongoDB");
-    // Use client.db() constructor to add new db instance
-    db = client.db(dbName);
 
     const server = new ApolloServer({
       typeDefs,
@@ -37,7 +29,7 @@ client
 
     app.use("/graphql", expressMiddleware(server));
 
-    // if we're in production, serve client/dist as static assets
+    // Serve static assets in production
     if (process.env.NODE_ENV === "production") {
       app.use(express.static(path.join(__dirname, "../client/dist")));
 
@@ -52,5 +44,5 @@ client
     });
   })
   .catch((err) => {
-    console.error("Mongo connection error: ", err.message);
+    console.error("MongoDB connection error:", err);
   });
